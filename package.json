@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "Mirko Marini 5C",
-  "license": "ISC",
+  "license": "MIT",
   "description": "Studio Medico",
   "type": "module",
   "dependencies": {
