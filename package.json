@@ -1,0 +1,25 @@
+{
+  "name": "studio-medico",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Mirko Marini 5C",
+  "license": "ISC",
+  "description": "Studio Medico",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "mysql2": "^3.14.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta author="Claude Sonnet 4 from Mirko Marini's prompts">
+    <title>Medici e Specialità</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="user-status">
+        <% if (user) { %>
+        <p class="user-greeting">
+            Benvenuto/a <%= user.nome %>!
+        </p>
+        <button class="bookings-btn" onclick="showBookingsModal()">Le Mie Prenotazioni</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+        <% } else { %>
+        <button class="login-btn" onclick="showLoginModal()">Login</button>
+        <% } %>
+    </div>
+
+    <div class="floating-elements">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Medici Specialisti</h1>
+            <p class="subtitle">Prenota la tua visita con i nostri professionisti</p>
+        </div>
+
+        <div class="glass-table">
+            <table class="table">
+                <thead class="table-header">
+                    <tr>
+                        <th>Specialità</th>
+                        <th>Nome</th>
+                        <th>Cognome</th>
+                        <th>Prezzo</th>
+                        <th>Azione</th>
+                    </tr>
+                </thead>
+                <tbody id="doctorsTable">
+                    <% medici.forEach((medico, index) => { %>
+                    <tr class="table-row" style="animation-delay: <%= index * 0.1 %>s;">
+                        <td class="table-cell">
+                            <span class="specialty-badge"><%= medico.specialita %></span>
+                        </td>
+                        <td class="table-cell doctor-name"><%= medico.nome_medico %></td>
+                        <td class="table-cell doctor-name"><%= medico.cognome_medico %></td>
+                        <td class="table-cell">€<%= medico.prezzo %></td>
+                        <td class="table-cell">
+                            <% if (user) { %>
+                            <button class="book-btn"
+                                onclick="showBookingModal('<%= medico.nome_medico %>', '<%= medico.cognome_medico %>', '<%= medico.specialita %>', <%= medico.id_medico %>, <%= medico.prezzo %>)">
+                                Prenota
+                            </button>
+                            <% } else { %>
+                            <button class="book-btn"
+                                onclick="bookAppointment('<%= medico.nome_medico %>', '<%= medico.cognome_medico %>', '<%= medico.specialita %>', <%= medico.id_medico %>)">
+                                Prenota
+                            </button>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal per Login/Registrazione -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+
+            <!-- Form di Login -->
+            <div id="loginForm" class="auth-form active">
+                <h2>Accedi al tuo account</h2>
+
+                <div id="loginMessage" class="message"></div>
+
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginUsername">Username:</label>
+                        <input type="text" id="loginUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" name="password" required>
+                    </div>
+                    <button type="submit" class="auth-btn">Accedi</button>
+                </form>
+                <p class="switch-form">
+                    Non hai un account?
+                    <a href="#" onclick="switchToRegister()">Registrati qui</a>
+                </p>
+            </div>
+
+            <!-- Form di Registrazione -->
+            <div id="registerForm" class="auth-form">
+                <h2>Crea un nuovo account</h2>
+
+                <div id="registerMessage" class="message"></div>
+
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="registerNome">Nome:</label>
+                        <input type="text" id="registerNome" name="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerCognome">Cognome:</label>
+                        <input type="text" id="registerCognome" name="cognome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerDataNascita">Data di Nascita:</label>
+                        <input type="date" id="registerDataNascita" name="data_nascita" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerCodiceFiscale">Codice Fiscale:</label>
+                        <input type="text" id="registerCodiceFiscale" name="codice_fiscale" required maxlength="16"
+                            style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerProvincia">Provincia:</label>
+                        <input type="text" id="registerProvincia" name="provincia" required maxlength="2"
+                            style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerUsername">Username:</label>
+                        <input type="text" id="registerUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password:</label>
+                        <input type="password" id="registerPassword" name="password" required>
+                    </div>
+                    <button type="submit" class="auth-btn">Registrati</button>
+                </form>
+                <p class="switch-form">
+                    Hai già un account?
+                    <a href="#" onclick="switchToLogin()">Accedi qui</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per Prenotazioni -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content booking-modal">
+            <span class="close" onclick="closeBookingModal()">&times;</span>
+
+            <div class="booking-header">
+                <h2>Prenota Visita</h2>
+                <div class="doctor-info">
+                    <h3 id="doctorName"></h3>
+                    <p id="doctorSpecialty"></p>
+                    <div class="price-badge" id="doctorPrice"></div>
+                </div>
+            </div>
+
+            <div id="bookingMessage" class="message"></div>
+
+            <form onsubmit="handleBooking(event)">
+                <!-- Selettore Date -->
+                <div class="form-group">
+                    <label>Seleziona una data:</label>
+                    <div class="date-grid" id="dateGrid"></div>
+                    <input type="hidden" id="selectedDate" name="data" required>
+                </div>
+
+                <!-- Selettore Orari -->
+                <div class="form-group">
+                    <label>Seleziona un orario:</label>
+                    <div class="time-grid" id="timeGrid">
+                        <div class="no-date-message">Seleziona prima una data</div>
+                    </div>
+                    <input type="hidden" id="selectedTime" name="orario" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="bookingNotes">Note aggiuntive (opzionale):</label>
+                    <textarea id="bookingNotes" name="note" rows="3"
+                        placeholder="Descrivi brevemente il motivo della visita o eventuali sintomi..."></textarea>
+                </div>
+
+                <div class="booking-summary">
+                    <h4>Riepilogo Prenotazione</h4>
+                    <div class="summary-item">
+                        <span>Paziente:</span>
+                        <span id="patientName"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Medico:</span>
+                        <span id="summaryDoctor"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Specialità:</span>
+                        <span id="summarySpecialty"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Data e Ora:</span>
+                        <span id="summaryDateTime">Seleziona data e orario</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>Costo:</span>
+                        <span id="summaryPrice"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn booking-btn">Conferma Prenotazione</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal per Le Mie Prenotazioni -->
+    <div id="bookingsModal" class="modal">
+        <div class="modal-content bookings-modal">
+            <span class="close" onclick="closeBookingsModal()">&times;</span>
+            
+            <div class="bookings-header">
+                <h2>Le Mie Prenotazioni</h2>
+                <p>Visualizza tutte le tue visite programmate e completate</p>
+            </div>
+            
+            <div id="bookingsMessage" class="message"></div>
+            
+            <div class="bookings-list" id="bookingsList">
+                <!-- Le prenotazioni verranno caricate qui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.userData = <%- JSON.stringify(user) %>;
+    </script>
+    <script src="/js/medici.js"></script>
+</body>
+
+</html>
